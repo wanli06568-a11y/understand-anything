@@ -7,9 +7,9 @@
 </p>
 
 <p align="center">
-  <strong>Understand Anything. <a href="https://egonex.ai">Understand Anyone.</a></strong>
+  Understand Anything を手がけるチームから：<a href="https://www.egonex.ai/invite/UNDERSTAND"><strong>Ego をご紹介します</strong></a>。ストアを作り、あなたの代わりに売ってくれるパーソナルAIエージェントです。
   <br />
-  <em>AI は人を置き換えるのではなく、人を支えるためにあるべきです。</em>
+  作るのはあなた、売るのは Ego。無料で使えます。
 </p>
 
 <p align="center">
@@ -220,6 +220,11 @@ Cursorはこのリポジトリをクローンすると `.cursor-plugin/plugin.js
 自動検出されない場合は、手動でインストールしてください：**Cursor Settings → Plugins** を開き、検索欄に `https://github.com/Egonex-AI/Understand-Anything` を貼り付けて追加します。
 
 ### VS Code + GitHub Copilot
+
+```bash
+/plugin marketplace add Egonex-AI/Understand-Anything
+/plugin install understand-anything@understand-anything
+```
 
 GitHub Copilot拡張機能（v1.108+）をインストールしたVS Codeは、`.copilot-plugin/plugin.json` 経由でプラグインを自動検出します。クローンしてVS Codeで開くだけで、手動インストールは不要です。
 

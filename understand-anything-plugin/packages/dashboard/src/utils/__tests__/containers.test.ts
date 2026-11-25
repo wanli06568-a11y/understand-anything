@@ -2,10 +2,10 @@ import { describe, it, expect } from "vitest";
 import { deriveContainers } from "../containers";
 import type { GraphNode, GraphEdge } from "@understand-anything/core/types";
 
-function node(id: string, filePath?: string): GraphNode {
+function node(id: string, filePath?: string, type: GraphNode["type"] = "file"): GraphNode {
   return {
     id,
-    type: "file",
+    type,
     name: id,
     filePath,
     summary: "",
@@ -127,5 +127,152 @@ describe("deriveContainers — community fallback", () => {
     // path was taken: NO folder-strategy 'big' container survives.
     expect(containers.find((c) => c.strategy === "folder" && c.name === "big")).toBeUndefined();
     expect(ungrouped.length).toBe(10);
+  });
+});
+
+describe("deriveContainers — container labels", () => {
+  // Two dense groups of 5 nodes in one folder, so the community path runs.
+  const nodes = Array.from({ length: 10 }, (_, i) =>
+    node(`n${i}`, `services/n${i}.go`),
+  );
+  const edges: GraphEdge[] = [];
+  for (const group of [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]]) {
+    for (const i of group) {
+      for (const j of group) {
+        if (i !== j) edges.push({ source: `n${i}`, target: `n${j}`, type: "calls" } as GraphEdge);
+      }
+    }
+  }
+  const idsOf = (from: number) =>
+    [0, 1, 2, 3, 4].map((k) => `n${from + k}`);
+
+  it("replaces fallback names with matching labels", () => {
+    const { containers } = deriveContainers(nodes, edges, [
+      { name: "Billing", nodeIds: idsOf(0) },
+      { name: "Auth", nodeIds: idsOf(5) },
+    ]);
+    const byMember = (id: string) =>
+      containers.find((c) => c.nodeIds.includes(id))!;
+    expect(byMember("n0").name).toBe("Billing");
+    expect(byMember("n7").name).toBe("Auth");
+  });
+
+  it("still matches when the label lists one node more or less", () => {
+    const { containers } = deriveContainers(nodes, edges, [
+      { name: "Billing", nodeIds: [...idsOf(0).slice(0, 4), "n9"] },
+    ]);
+    const c = containers.find((x) => x.nodeIds.includes("n0"))!;
+    expect(c.name).toBe("Billing");
+  });
+
+  it("keeps the fallback name when overlap is too low", () => {
+    const { containers } = deriveContainers(nodes, edges, [
+      { name: "Other", nodeIds: ["n0", "n5", "x1", "x2", "x3"] },
+    ]);
+    for (const c of containers) expect(c.name).toMatch(/^Cluster [A-Z]$/);
+  });
+
+  it("uses each label for at most one container", () => {
+    const { containers } = deriveContainers(nodes, edges, [
+      { name: "Billing", nodeIds: idsOf(0) },
+    ]);
+    expect(containers.filter((c) => c.name === "Billing")).toHaveLength(1);
+  });
+
+  it("leaves folder containers alone", () => {
+    const folderNodes = [
+      node("a", "src/auth/login.go"),
+      node("b", "src/auth/oauth.go"),
+      node("c", "src/cart/cart.go"),
+      node("d", "src/cart/checkout.go"),
+    ];
+    const { containers } = deriveContainers(folderNodes, [], [
+      { name: "Renamed", nodeIds: ["a", "b"] },
+    ]);
+    expect(containers.map((c) => c.name).sort()).toEqual(["auth", "cart"]);
+  });
+});
+
+describe("deriveContainers — reference basis projection", () => {
+  const basisNodes = Array.from({ length: 10 }, (_, i) =>
+    node(`n${i}`, `services/n${i}.go`),
+  );
+  const basisEdges: GraphEdge[] = [];
+  for (const group of [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]]) {
+    for (const i of group) {
+      for (const j of group) {
+        if (i !== j) {
+          basisEdges.push({
+            source: `n${i}`,
+            target: `n${j}`,
+            type: "calls",
+          } as GraphEdge);
+        }
+      }
+    }
+  }
+
+  it("projects class nodes onto their file community", () => {
+    const visible = [
+      ...basisNodes.slice(0, 3),
+      node("c0", "services/n0.go", "class"),
+      node("c1", "services/n1.go", "class"),
+    ];
+    const { containers } = deriveContainers(
+      visible,
+      [],
+      [{ name: "Billing", nodeIds: basisNodes.slice(0, 5).map((n) => n.id) }],
+      "Cluster",
+      { nodes: basisNodes, edges: basisEdges },
+    );
+    expect(containers).toHaveLength(1);
+    expect(containers[0].name).toBe("Billing");
+    expect([...containers[0].nodeIds].sort()).toEqual(["c0", "c1", "n0", "n1", "n2"]);
+  });
+
+  it("keeps focus subsets grouped by the reference", () => {
+    const visible = basisNodes.slice(0, 2);
+    const { containers } = deriveContainers(
+      visible,
+      [],
+      [{ name: "Billing", nodeIds: basisNodes.slice(0, 5).map((n) => n.id) }],
+      "Cluster",
+      { nodes: basisNodes, edges: basisEdges },
+    );
+    expect(containers).toHaveLength(1);
+    expect(containers[0].name).toBe("Billing");
+    expect(containers[0].nodeIds.sort()).toEqual(["n0", "n1"]);
+  });
+
+  it("leaves nodes outside the reference ungrouped", () => {
+    const outside = node("outside", "other/outside.go");
+    const visible = [basisNodes[0], outside];
+    const { containers, ungrouped } = deriveContainers(
+      visible,
+      [],
+      [],
+      "Cluster",
+      { nodes: basisNodes, edges: basisEdges },
+    );
+    expect(ungrouped).toContain("outside");
+    expect(containers.every((c) => !c.nodeIds.includes("outside"))).toBe(true);
+  });
+
+  it("uses the file name for a projected basis-singleton community", () => {
+    const singleFile = node("only", "only.go");
+    const onlyClass = node("only-class", "only.go", "class");
+    const sibling = node("sibling", "sibling.go");
+    const siblingClass = node("sibling-class", "sibling.go", "class");
+    const basis = [singleFile, sibling];
+    const visible = [singleFile, onlyClass, sibling, siblingClass];
+    const { containers } = deriveContainers(
+      visible,
+      [],
+      [],
+      "Cluster",
+      { nodes: basis, edges: [] },
+    );
+    const onlyContainer = containers.find((c) => c.nodeIds.includes("only-class"));
+    expect(onlyContainer?.name).toBe("only");
   });
 });

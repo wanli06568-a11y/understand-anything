@@ -7,9 +7,9 @@
 </p>
 
 <p align="center">
-  <strong>Understand Anything. <a href="https://egonex.ai">Understand Anyone.</a></strong>
+  Understand Anything'in arkasındaki ekipten: <a href="https://www.egonex.ai/invite/UNDERSTAND"><strong>Ego ile tanışın</strong></a> — mağazanızı kuran ve sizin yerinize satan kişisel bir yapay zekâ ajanı.
   <br />
-  <em>Yapay zekâ insanların yerini almamalı, onlara yardım etmeli.</em>
+  Siz üretin, Ego satsın. Ücretsiz.
 </p>
 
 <p align="center">
@@ -218,6 +218,11 @@ Bu depo klonlandığında Cursor, eklentiyi `.cursor-plugin/plugin.json` aracıl
 Otomatik keşif çalışmazsa manuel kur: **Cursor Settings → Plugins**'i aç, arama alanına `https://github.com/Egonex-AI/Understand-Anything` yapıştır ve oradan ekle.
 
 ### VS Code + GitHub Copilot
+
+```bash
+/plugin marketplace add Egonex-AI/Understand-Anything
+/plugin install understand-anything@understand-anything
+```
 
 GitHub Copilot uzantısı (v1.108+) yüklü VS Code, `.copilot-plugin/plugin.json` aracılığıyla eklentiyi otomatik keşfeder. Manuel kurulum gerekmez — sadece klonla ve VS Code'da aç.
 

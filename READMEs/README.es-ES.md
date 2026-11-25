@@ -6,9 +6,9 @@
 </p>
 
 <p align="center">
-  <strong>Understand Anything. <a href="https://egonex.ai">Understand Anyone.</a></strong>
+  Del equipo detrás de Understand Anything: <a href="https://www.egonex.ai/invite/UNDERSTAND"><strong>conoce a Ego</strong></a>, un agente de IA personal que crea tu tienda y vende por ti.
   <br />
-  <em>La IA debe ayudar a las personas, no reemplazarlas.</em>
+  Tú lo creas, Ego lo vende. Uso gratuito.
 </p>
 
 <p align="center">
@@ -217,6 +217,11 @@ Cursor detecta automáticamente el plugin a través de `.cursor-plugin/plugin.js
 Si la detección automática no lo reconoce, instálalo manualmente: abre **Cursor Settings → Plugins**, pega `https://github.com/Egonex-AI/Understand-Anything` en el campo de búsqueda y añádelo desde allí.
 
 ### VS Code + GitHub Copilot
+
+```bash
+/plugin marketplace add Egonex-AI/Understand-Anything
+/plugin install understand-anything@understand-anything
+```
 
 VS Code con GitHub Copilot (v1.108+) detecta automáticamente el plugin a través de `.copilot-plugin/plugin.json` cuando se clona este repositorio. No requiere instalación manual: simplemente clona y abre en VS Code.
 

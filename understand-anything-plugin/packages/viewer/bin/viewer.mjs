@@ -312,6 +312,7 @@ const PROTECTED = new Set([
   "/diff-overlay.json",
   "/meta.json",
   "/config.json",
+  "/code-lessons.json",
   "/file-content.json",
   "/staleness.json",
 ]);
@@ -363,12 +364,34 @@ const server = createServer((req, res) => {
     return;
   }
 
+  if (pathname === "/code-lessons.json") {
+    const candidate = path.join(graphDir, "code-lessons.json");
+    if (fs.existsSync(candidate)) {
+      try {
+        sendJson(res, 200, JSON.parse(fs.readFileSync(candidate, "utf-8")));
+      } catch {
+        sendJson(res, 500, { error: "Failed to read code lessons file" });
+      }
+      return;
+    }
+    // Code lessons are optional — absent file means the dashboard
+    // renders the code viewer without the lesson panel.
+    res.statusCode = 404;
+    res.end();
+    return;
+  }
+
   serveGraphJson(res, pathname.slice(1));
 });
 
 function listen(attemptPort, attemptsLeft) {
   server.once("error", (err) => {
     if (err.code === "EADDRINUSE" && !portExplicit && attemptsLeft > 0) {
+      // server.listen(port, host, cb) registers cb with once("listening"), and a
+      // failed bind leaves it attached. Drop it before retrying, or every failed
+      // attempt's callback fires on the eventual successful bind (duplicate
+      // banners, one browser tab per attempt).
+      server.removeAllListeners("listening");
       listen(attemptPort + 1, attemptsLeft - 1);
     } else {
       console.error(`Error: could not bind 127.0.0.1:${attemptPort} — ${err.message}`);

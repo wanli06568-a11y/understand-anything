@@ -4,6 +4,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { execFileSync, spawn } from "node:child_process";
 import { mkdtempSync, rmSync, mkdirSync, writeFileSync, existsSync } from "node:fs";
+import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -178,6 +179,37 @@ describe.skipIf(!existsSync(VIEWER_DIST))("understand-anything-viewer", () => {
     expect([403, 404]).toContain(res.status);
   });
 
+  it("serves code lessons from the data directory", async () => {
+    // Absent file → 404; the dashboard renders the viewer without lessons.
+    const missing = await fetch(`${base()}/code-lessons.json?token=${viewer.token}`);
+    expect(missing.status).toBe(404);
+
+    const lessons = {
+      version: 1,
+      generatedAt: "2026-10-22T00:00:00.000Z",
+      files: {
+        "src/a.ts": {
+          overview: "Entry fixture.",
+          sections: [
+            { title: "The export", lineRange: [1, 1], explanation: "Declares a.", tourOrder: 1 },
+          ],
+        },
+      },
+    };
+    writeFileSync(join(root, ".ua", "code-lessons.json"), JSON.stringify(lessons));
+
+    const denied = await fetch(`${base()}/code-lessons.json`);
+    expect(denied.status).toBe(403);
+
+    const res = await fetch(`${base()}/code-lessons.json?token=${viewer.token}`);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.files["src/a.ts"].overview).toBe("Entry fixture.");
+    expect(body.files["src/a.ts"].sections[0].lineRange).toEqual([1, 1]);
+
+    rmSync(join(root, ".ua", "code-lessons.json"));
+  });
+
   it("falls back to legacy .understand-anything/ projects", async () => {
     const legacyRoot = setupProject(".understand-anything");
     const legacyViewer = await startViewer(legacyRoot);
@@ -190,6 +222,53 @@ describe.skipIf(!existsSync(VIEWER_DIST))("understand-anything-viewer", () => {
     } finally {
       legacyViewer.proc.kill();
       rmSync(legacyRoot, { recursive: true, force: true });
+    }
+  }, 15_000);
+});
+
+/** Hold a loopback port; resolves null if something else already holds it. */
+function occupyPort(port) {
+  return new Promise((resolvePromise) => {
+    const server = createServer();
+    server.once("error", () => resolvePromise(null));
+    server.listen(port, "127.0.0.1", () => resolvePromise(server));
+  });
+}
+
+describe.skipIf(!existsSync(VIEWER_DIST))("understand-anything-viewer port fallback", () => {
+  it("announces the dashboard once after skipping busy ports", async () => {
+    const root = setupProject(".ua");
+    // Hold the default port and the next one so the viewer has to retry twice.
+    const blockers = await Promise.all([5173, 5174].map(occupyPort));
+    const proc = spawn(process.execPath, [VIEWER_BIN, root, "--no-open"], {
+      env: { ...process.env },
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    try {
+      const out = await new Promise((resolvePromise, rejectPromise) => {
+        let text = "";
+        const timer = setTimeout(() => {
+          rejectPromise(new Error(`viewer did not start.\n${text}`));
+        }, 10_000);
+        const onData = (chunk) => {
+          text += String(chunk);
+          if (text.includes("Dashboard URL")) {
+            clearTimeout(timer);
+            // Every 'listening' callback fires in the same tick; give the pipe a moment.
+            setTimeout(() => resolvePromise(text), 500);
+          }
+        };
+        proc.stdout.on("data", onData);
+        proc.stderr.on("data", onData);
+      });
+      expect(out.match(/Dashboard URL/g)).toHaveLength(1);
+      const ports = [...out.matchAll(/127\.0\.0\.1:(\d+)\//g)].map((m) => Number(m[1]));
+      expect(ports).toHaveLength(1);
+      expect(ports[0]).toBeGreaterThan(5174);
+    } finally {
+      proc.kill();
+      for (const blocker of blockers) blocker?.close();
+      rmSync(root, { recursive: true, force: true });
     }
   }, 15_000);
 });

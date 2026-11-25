@@ -6,9 +6,9 @@
 </p>
 
 <p align="center">
-  <strong>Understand Anything. <a href="https://egonex.ai">Understand Anyone.</a></strong>
+  Understand Anything 팀이 소개합니다: <a href="https://www.egonex.ai/invite/UNDERSTAND"><strong>Ego를 만나 보세요</strong></a>. 스토어를 만들어 주고 당신 대신 팔아 주는 개인 AI 에이전트입니다.
   <br />
-  <em>AI는 사람을 대체하는 것이 아니라 사람을 도와야 합니다.</em>
+  만드는 건 당신, 파는 건 Ego. 무료로 사용할 수 있습니다.
 </p>
 
 <p align="center">
@@ -217,6 +217,11 @@ iwr -useb https://raw.githubusercontent.com/Egonex-AI/Understand-Anything/main/i
 자동 인식이 되지 않으면 수동으로 설치하세요: **Cursor Settings → Plugins**를 열고 검색란에 `https://github.com/Egonex-AI/Understand-Anything`를 붙여넣은 뒤 추가하세요.
 
 ### VS Code + GitHub Copilot
+
+```bash
+/plugin marketplace add Egonex-AI/Understand-Anything
+/plugin install understand-anything@understand-anything
+```
 
 GitHub Copilot(v1.108+)이 설치된 VS Code는 `.copilot-plugin/plugin.json`을 통해 플러그인을 자동으로 인식합니다. 수동 설치가 필요 없습니다. 클론 후 VS Code에서 열기만 하면 됩니다.
 

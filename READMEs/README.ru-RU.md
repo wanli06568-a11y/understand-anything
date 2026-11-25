@@ -7,9 +7,9 @@
 </p>
 
 <p align="center">
-  <strong>Understand Anything. <a href="https://egonex.ai">Understand Anyone.</a></strong>
+  От команды Understand Anything: <a href="https://www.egonex.ai/invite/UNDERSTAND"><strong>знакомьтесь, Ego</strong></a> — персональный ИИ-агент, который создаёт ваш магазин и продаёт за вас.
   <br />
-  <em>ИИ должен помогать людям, а не заменять их.</em>
+  Вы создаёте, Ego продаёт. Бесплатно.
 </p>
 
 <p align="center">
@@ -218,6 +218,11 @@ Cursor автоматически обнаруживает плагин чере
 Если автообнаружение не сработало, установите вручную: откройте **Cursor Settings → Plugins**, вставьте `https://github.com/Egonex-AI/Understand-Anything` в поле поиска и добавьте оттуда.
 
 ### VS Code + GitHub Copilot
+
+```bash
+/plugin marketplace add Egonex-AI/Understand-Anything
+/plugin install understand-anything@understand-anything
+```
 
 VS Code с GitHub Copilot (v1.108+) автоматически обнаруживает плагин через `.copilot-plugin/plugin.json` при клонировании этого репозитория. Ручная установка не требуется — просто склонируйте и откройте в VS Code.
 

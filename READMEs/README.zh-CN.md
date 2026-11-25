@@ -6,9 +6,9 @@
 </p>
 
 <p align="center">
-  <strong>Understand Anything. <a href="https://egonex.ai">Understand Anyone.</a></strong>
+  来自 Understand Anything 背后的团队：<a href="https://www.egonex.ai/invite/UNDERSTAND"><strong>认识 Ego</strong></a>，一个帮你开好店、替你卖东西的个人 AI Agent。
   <br />
-  <em>AI 应该帮助人，而不是取代人。</em>
+  你负责做出来，Ego 负责卖出去。免费使用。
 </p>
 
 <p align="center">
@@ -217,6 +217,11 @@ iwr -useb https://raw.githubusercontent.com/Egonex-AI/Understand-Anything/main/i
 若自动发现未生效，可手动安装：打开 **Cursor Settings → Plugins**，在搜索框中粘贴 `https://github.com/Egonex-AI/Understand-Anything` 并添加。
 
 ### VS Code + GitHub Copilot
+
+```bash
+/plugin marketplace add Egonex-AI/Understand-Anything
+/plugin install understand-anything@understand-anything
+```
 
 安装 GitHub Copilot 扩展（v1.108+）后，VS Code 会通过 `.copilot-plugin/plugin.json` 自动发现插件，克隆后直接在 VS Code 中打开即可，无需手动安装。
 

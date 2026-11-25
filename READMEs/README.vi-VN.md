@@ -7,9 +7,9 @@
 </p>
 
 <p align="center">
-  <strong>Understand Anything. <a href="https://egonex.ai">Understand Anyone.</a></strong>
+  Từ đội ngũ đứng sau Understand Anything: <a href="https://www.egonex.ai/invite/UNDERSTAND"><strong>Gặp gỡ Ego</strong></a>, AI agent cá nhân dựng cửa hàng và bán hàng giúp bạn.
   <br />
-  <em>AI nên giúp con người, không phải thay thế họ.</em>
+  Bạn tạo ra, Ego bán. Miễn phí sử dụng.
 </p>
 
 <p align="center">
@@ -226,6 +226,11 @@ Cursor tự động phát hiện plugin qua `.cursor-plugin/plugin.json` khi rep
 Nếu tự động phát hiện không hoạt động, hãy cài đặt thủ công: mở **Cursor Settings → Plugins**, dán `https://github.com/Egonex-AI/Understand-Anything` vào ô tìm kiếm và thêm từ đó.
 
 ### VS Code + GitHub Copilot
+
+```bash
+/plugin marketplace add Egonex-AI/Understand-Anything
+/plugin install understand-anything@understand-anything
+```
 
 VS Code với GitHub Copilot (v1.108+) tự động phát hiện plugin qua `.copilot-plugin/plugin.json` khi repo này được clone. Không cần cài đặt thủ công — chỉ cần clone và mở trong VS Code.
 
